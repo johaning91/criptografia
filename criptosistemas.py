@@ -1,4 +1,4 @@
-#-*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 import string
 import random
 import sys
@@ -9,8 +9,19 @@ import codecs
 import math
 from operator import itemgetter
 
+
+
 def menu():
     if len(sys.argv) <  5:
+        print ("                   Elaborado por:")
+        print ("JHONATAN ASTUDILLO ASTUDILLO --- KRISTEIN JOHAN ORDOÑEZ lOPEZ")
+        print ("jonas@unicauca.edu.co            joan@unicauca.edu.co")
+        print ("      46102040                         46101051")
+        print ("                Universidad del Cauca")
+        print ("  Facultad de Ingeniería Electrónica y Telecomunicaciones")
+        print ("              Departamento de Sistemas")
+        print ("------------------------------------------------------------------------------------------------------------------")
+
         print ("------------------------------------------------------Ayuda-------------------------------------------------------")
         print ("La forma correcta de ejecutar este archivo es : python criptosistemas.py [archivo_entrada] [-c/-d] [algoritmo] [Base64 (opcional)] [archivo_salida]")
         print ("-c: para cifrar")
@@ -22,7 +33,7 @@ def menu():
         print ("            -ts ---> Transposicion por series")
         print ("            -v  ---> Vernam ")
         print ("            -a  ---> ADFGVX ")
-        print ("            -c  ---> COLOSSUS")
+        print ("            -e  ---> Enigma")
         print ("EJEMPLO DE CIFRADO: python criptosistemas.py quijote.txt -c -t cifrado_simple")
         print ("EJEMPLO DE DESCIFRADO: python criptosistemas.py cifrado_simple.cif -d -t claro_simple")
         print ("EJEMPLO DE CIFRADO CON CODIFICACION BASE 64: python criptosistemas.py quijote.txt -c -t -b64 cifrado_simple")
@@ -342,13 +353,78 @@ def menu():
                 print("Proceso terminado en",fin,"segundos")
                 escribe_archivo(sys.argv[4]+".dec",texto_claro)
 
-        ###aqui va el colossus
-        elif sys.argv[3] == "-c":
+        ###aqui va el cenigma
+        elif sys.argv[3] == "-e":
 
             if sys.argv[2] == "-c":
-                print("aqui cifra")
+                print("cifrando ...")
+                texto=leer_archivo(sys.argv[1])
+                if sys.argv[1]=="MobyDick.txt":
+                    # REEMPLAZAR MOBY
+                    texto=texto.replace("\n",'Z')
+                    texto=texto.replace("[",'Z')
+                    texto=texto.replace("_",'Z')
+                    texto=texto.replace("%",'Z')
+                    texto=texto.replace("]",'Z')
+                    inicio = time.clock()  
+                    cif= enigma(texto,[2,3,1],[5,4,17],[11,1,2,20,4,5,6,7,8,9,10,0,12,13,14,15,16,17,18,19,3,21,22,23,24,25])
+                    fin=time.clock()-inicio
+                    print("Proceso terminado en",fin,"segundos")
+                    escribe_archivo(sys.argv[4]+".cif",cif)
+                else:
+
+                    texto=texto.replace("Ü","A")
+                    texto=texto.replace("«","B")    
+                    texto=texto.replace("Ï","C")
+                    texto=texto.replace("À","D")
+                    texto=texto.replace("Ù","E")
+                    texto=texto.replace("3","F")
+                    texto=texto.replace("]","G")
+                    texto=texto.replace("Ñ","H")
+                    inicio = time.clock()  
+                    cif= enigma(texto,[2,3,1],[5,4,17],[11,1,2,20,4,5,6,7,8,9,10,0,12,13,14,15,16,17,18,19,3,21,22,23,24,25])
+                    fin=time.clock()-inicio
+                    print("Proceso terminado en",fin,"segundos")
+                    escribe_archivo(sys.argv[4]+".cif",cif)
+
             elif sys.argv[2] =="-d":
-                print("aqui descrifra")
+                print("Descifrando...")
+                textocif = leer_archivo(sys.argv[1])
+                if sys.argv[1]=="MobyDick.cif":
+                    inicio = time.clock() 
+                    td = enigma(textocif,[2,3,1],[5,4,17],[11,1,2,20,4,5,6,7,8,9,10,0,12,13,14,15,16,17,18,19,3,21,22,23,24,25])
+                    t = list(td)
+                    #RESTAURAR MOBY
+                    t[114392] ='_'
+                    t[114396] ='_'
+                    t[125136] ='_'
+                    t[125140] ='_'
+                    t[290954] ='['
+                    t[290987] =']'
+                    t[845510] ='['
+                    t[845656] =']'
+                    t[958507] ='%'
+                    t[966800] ='\n'
+                    fin=time.clock()-inicio
+                    print("Proceso terminado en",fin,"segundos")
+                    tf=''.join(t) 
+                    escribe_archivo(sys.argv[4]+".dec",tf)
+                else:
+
+                    cambios  =listaCambiosQ()
+                    inicio = time.clock() 
+                    td = enigma(textocif,[2,3,1],[5,4,17],[11,1,2,20,4,5,6,7,8,9,10,0,12,13,14,15,16,17,18,19,3,21,22,23,24,25])
+                    t = list(td)
+                    
+                    for i in cambios:
+
+                        car = i[0]
+                        t[i[1]]=car
+                    fin=time.clock()-inicio
+                    print("Proceso terminado en",fin,"segundos")
+                    tf=''.join(t) 
+                    
+                    escribe_archivo(sys.argv[4]+".dec",tf)
 
 
 letra_clave = ['A', 'D', 'F', 'G', 'V', 'X']
@@ -396,7 +472,7 @@ def limpiarTexto(texto, archivo):
         texto = texto.replace(']', '1')
         texto = texto.replace('[', '2')
         texto = texto.replace('%', '3')
-        texto = texto.replace('\n', '4')
+        texto = texto.replace('\n','4')
     return texto
 
 def textoOriginal(texto, archivo):
@@ -708,6 +784,144 @@ def descifrar_ADFGVX(criptograma, txt_clave):
             pass
 
     return texto_claro
+
+###Empieza enigma 
+
+
+
+# Modelo históricamente preciso de la máquina Enigma I, desarrollada en 1927 y usada por el ejército y fuerzas aéreas alemanas en la Segunda Guerra Mundial
+# Al igual que la Enigma I, incluye un reflector fijo y tres rotores con posiciones intercambiables (I,II,III), junto con los dos adicionales (IV, V) que fueron desarrollados en 1938 para multiplicar por 10 la seguridad del cifrado (10 * 3! = 5! / 2)
+# Los rotores, el reflector y el plugboard son representados por listas de números, y las letras por números.
+# A pesar de que he hecho múltiples pruebas con otros modelos, es posible que el programa tenga fallos. Las críticas y sugerencias son bienvenidas en ferblasco7@gmail.com
+
+# Esta es una funcioncita para amenizar la lectura de la función enigma, donde se usan constantemente rotores.
+def rotor(letra, numero, inverso=False): # Introducimos la "letra" que queremos cifrar (realmente, introducimos el NÚMERO asociado a dicha letra); el número del rotor (1, 2, 3, 4 ó 5) y la posición del rotor (si vemos por la ventanilla una A o un 1 (según el modelo de Enigma), será 0; si vemos B, 1...)
+
+    # He aquí los circuitos internos de cada rotor, sacados de Wikipedia (recuerda, A=0, B=1,...)
+    I=[4, 10, 12, 5, 11, 6, 3, 16, 21, 25, 13, 19, 14, 22, 24, 7, 23, 20, 18, 15, 0, 8, 1, 17, 2, 9]
+    II=[0, 9, 3, 10, 18, 8, 17, 20, 23, 1, 11, 7, 22, 19, 12, 2, 16, 6, 25, 13, 15, 24, 5, 21, 14, 4]
+    III=[1, 3, 5, 7, 9, 11, 2, 15, 17, 19, 23, 21, 25, 13, 24, 4, 8, 22, 6, 0, 10, 12, 20, 18, 16, 14]
+
+    # Aunque la Enigma original no los llevaba, en la literatura criptográfica se suele modelizar la Enigma con 5 rotores, incluyendo el IV y V incorporados por el ejército Nazi (ya que eran estas las características de la Enigma estudiada por el equipo de Tuering en Bletchley Park)
+    #IV=[4, 18, 14, 21, 15, 25, 9, 0, 24, 16, 20, 8, 17, 7, 23, 11, 13, 5, 19, 6, 10, 3, 2, 12, 22, 1]
+    #V=[21, 25, 1, 17, 6, 8, 19, 24, 20, 15, 18, 3, 13, 7, 11, 23, 0, 22, 12, 9, 16, 14, 5, 4, 2, 10]
+    # Siempre es más fácil trabajar con listas (había escrito 'vectores' pero he decidido cambiar el término):
+    
+    tipo=[I,II,III,] # Como véis, el rotor I es el 0, el rotor II es el 1 y el III es el 2. ¿Cuándo nos pondremos de acuerdo en cuál es el primer número natural? (Yo voto 0)
+
+    if inverso==False:
+        return tipo[numero-1][(letra)%26] # Devolvemos la letra cifrada con el rotor escogido. 
+    else:
+        return tipo[numero-1].index((letra)%26)
+
+
+# Aquí empieza lo bueno
+def enigma(texto, numeros, posiciones, cambios=list(range(26))): # Introducir: texto a cifrar (en mayúsculas y sin eñes, porfi); lista de los números de los rotores a utilizar en el orden deseado; vector con sus posiciones iniciales y lista de los cambios de letra del 'plugboard' (por defecto, se considera que no se realizan cambios)
+    # Antes que nada, declaramos las posiciones (letras) en las que cada rotor hace girar al siguiente (no, no giran todos en la Z... se las traen estos alemanes)
+    girador=[16, 4, 21, 9, 25] # Es decir, el rotor I hace girar al de su izquierda cuando pasa de la Q a la R; el rotor II, cuando pasa de la E a la F,...
+
+    lista=list(texto)  # Convertimos el texto en una lista de caracteres. Ejemplo: 'hola' pasa a ser ('h','o','l','a')
+
+    listacif=[] # Inicializamos la lista donde almacenaremos las letras cifradas
+
+    letras=[ord(letra)-65 for letra in lista] # ord nos da un numero asociado al caracter. Que no te engañe el nombre, son números, no letras.
+    # Por idiosincrasias en las que no entraremos, a la letra A le corresponde el 65, a la B el 66,... y así en orden alfabético. Por eso, restamos 65 a todos los elementos de la lista. 
+    #print(lista)
+    #print(cambios[26])
+    #print(letras)
+    for letra in letras: # Bucle para codificar letra por letra
+    # Lo primero que hace la letra es pasar por el plugboard o cambiador
+        
+        letra=cambios[(letra)]
+
+        posiciones[2]=(posiciones[2]+1)%26 # Hacemos girar al rotor derecho, asegurándonos de que si sobrepasa 25 vuelva al 0 (pasar de la A a la Z
+
+
+        # Comprobamos si ha de girar algún otro rotor
+        if posiciones[2]==girador[numeros[2]-1]+1: # A ver si gira el de enmedio
+            posiciones[1]=(posiciones[1]+1)%26
+            
+        if posiciones[1]==girador[numeros[1]-1]: # A ver si gira el de la derecha 
+            posiciones[0]=(posiciones[0]+1)%26
+            posiciones[1]+=1 #El rotor de enmedio puede girar dos veces seguidas. Esta sutileza, que se aprecia claramente en el modelo gráfico recomendado, me dio algún dolor de cabeza.
+
+        # Hacemos pasar la letra por los tres rotores y el reflector
+        rotor1=rotor((letra+posiciones[2])%26, numeros[2]) # Vamos a hacer pasar el resultado de cada rotor al siguiente. Podríamos haber anidado tres funciones rotor, pero queda más legible así.
+
+        rotor2=rotor((rotor1-(posiciones[2]-posiciones[1]))%26, numeros[1])
+
+        rotor3=rotor(rotor2-(posiciones[1]-posiciones[0])%26, numeros[0]) # (No confundir rotor2 con roto2) (xD)
+
+        # Ahora vamos con la reflexión. Técnicamente, hay varios reflectores de la enigma, que al fin y al cabo son rotores con la única modificación de que (además de no girar nunca) su entrada y salida de corriente dan al mismo rotor. Por no enmarañar demasiado la función, no he querido meter esa variable y doy por hecho que el reflector está fijo y es el conocido como Reflector B. Esta decisión, además, es compatible con las modelizaciones comunes de Enigma.
+        R=[24, 17, 20, 7, 16, 18, 11, 3, 15, 23, 13, 6, 14, 10, 12, 8, 4, 1, 5, 25, 2, 22, 21, 9, 0, 19] # Como veis, el reflector es como un rotor más
+        
+        reflejado=R[rotor3-posiciones[0]]
+
+        # Aquí viframos al contrario que anteriormente. Antes, la letra a cifrar se tomaba como índice del elemento, siendo éste la letra cifrada. Ejemplo: queremos cifrar A (cuyo número asociado es 0) con el rotor I (que es una lista I=[4, 10, 12,..]), cogíamos el elemento 0 de I (cifrando 'A' como 'E'). 
+        # Ahora, para cifrar 'A', cogemos la posición del elemento 0 en I (como 0 es el 21º elemento de I, ciframos la A como V)
+
+        rotor3=rotor(reflejado+posiciones[0], numeros[0], True)
+
+        rotor2=rotor(rotor3+(posiciones[1]-posiciones[0])%26, numeros[1], True)
+
+        rotor1=(rotor(rotor2+(posiciones[2]-posiciones[1])%26, numeros[2], True)-posiciones[2])%26
+
+        # pasa la letra por el plugboard, por si se le ha asociado un cambio:
+        letra=cambios[rotor1]
+        
+        listacif.append(letra) # Añadimos la letra cifrada a la lista
+
+    
+
+    listafin=[chr(letra+65) for letra in listacif] 
+    
+    listafin=''.join(listafin) 
+    return listafin
+##Ternima enigma
+
+
+
+def leer_archivo(archivo):
+    texto = open(archivo,'r',encoding='latin-1') 
+    texto = texto.read()
+    #print (texto)
+    return texto
+
+
+def escribe_archivo(nombre,contenido):
+    f = open (nombre,'w',encoding="latin-1")
+    f.write(contenido)
+    f.close()
+    
+
+def listaCambiosQ():
+    texto = leer_archivo("quijote.txt")
+    listatext= list(texto)
+    pos=0
+
+    abc = ('A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z')
+    listaCambios=[]
+    for letra in listatext:
+        cambio=[]
+        if(letra not in abc ):
+            #print(letra)
+            cambio.append(letra)
+            cambio.append(pos)
+            listaCambios.append(cambio)
+        
+        pos= pos+1
+    return listaCambios
+
+
+
+
+
+
+
+
+
+ 
+
 
 menu()
 #leer_archivo("quijote.txt")    

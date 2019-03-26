@@ -8,6 +8,7 @@ import base64
 import codecs
 import math
 from operator import itemgetter
+import hashlib
 
 
 
@@ -17,13 +18,15 @@ def menu():
         print ("JHONATAN ASTUDILLO ASTUDILLO --- KRISTEIN JOHAN ORDOÑEZ lOPEZ")
         print ("jonas@unicauca.edu.co            joan@unicauca.edu.co")
         print ("      46102040                         46101051")
+        print ("Introduccion a la criptografia / Docente : Siler Amador Donado")
         print ("                Universidad del Cauca")
         print ("  Facultad de Ingeniería Electrónica y Telecomunicaciones")
         print ("              Departamento de Sistemas")
+        print ("Repositorio de los archivos: https://github.com/johaning91/criptografia")
         print ("------------------------------------------------------------------------------------------------------------------")
 
         print ("------------------------------------------------------Ayuda-------------------------------------------------------")
-        print ("La forma correcta de ejecutar este archivo es : python criptosistemas.py [archivo_entrada] [-c/-d] [algoritmo] [Base64 (opcional)] [archivo_salida]")
+        print ("La forma correcta de ejecutar este archivo es : python3 criptosistemas.py [archivo_entrada] [-c/-d] [algoritmo] [Base64 (opcional)] [archivo_salida]")
         print ("-c: para cifrar")
         print ("-d: para decifrar")
         print ("-b64: para codificacion Base64")
@@ -34,10 +37,11 @@ def menu():
         print ("            -v  ---> Vernam ")
         print ("            -a  ---> ADFGVX ")
         print ("            -e  ---> Enigma")
-        print ("EJEMPLO DE CIFRADO: python criptosistemas.py quijote.txt -c -t cifrado_simple")
-        print ("EJEMPLO DE DESCIFRADO: python criptosistemas.py cifrado_simple.cif -d -t claro_simple")
-        print ("EJEMPLO DE CIFRADO CON CODIFICACION BASE 64: python criptosistemas.py quijote.txt -c -t -b64 cifrado_simple")
-        print ("EJEMPLO DE DESCIFRADO CON CODIFICACION BASE 64:: python criptosistemas.py cifrado_simple.cif -d -t -b64 claro_simple")
+        print ("EJEMPLO DE CIFRADO: python3 criptosistemas.py quijote.txt -c -t cifrado_simple")
+        print ("EJEMPLO DE DESCIFRADO: python3 criptosistemas.py cifrado_simple.cif -d -t claro_simple")
+        print ("EJEMPLO DE CIFRADO CON CODIFICACION BASE 64: python3 criptosistemas.py quijote.txt -c -t -b64 cifrado_simple")
+        print ("EJEMPLO DE DESCIFRADO CON CODIFICACION BASE 64:: python3 criptosistemas.py cifrado_simple.cif -d -t -b64 claro_simple")
+        print ("Agradecimientos a ferblasco7 por repositorio donde explicaba enigma ")
 
     else:
         if sys.argv[3] == "-t":
@@ -333,12 +337,14 @@ def menu():
                   
                 clave=leer_archivo("claveADFGVX.txt")
                 texto_claro=leer_archivo(sys.argv[1])
+                print("hash .txt= "+ hashlib.md5(texto_claro.encode('utf-8')).hexdigest())
                 texto_claro = limpiarTexto(texto_claro, sys.argv[1])
                 inicio = time.clock()  
 
                 cripto=cifrar_ADFGVX(texto_claro, clave)
                 fin=time.clock()-inicio
                 print("Proceso terminado en",fin,"segundos")
+                print("hash .cif= "+ hashlib.md5(cripto.encode('utf-8')).hexdigest())
                 escribe_archivo(sys.argv[4]+".cif",cripto)
 
             elif sys.argv[2] =="-d":
@@ -352,6 +358,7 @@ def menu():
                 fin=time.clock()-inicio
                 print("Proceso terminado en",fin,"segundos")
                 escribe_archivo(sys.argv[4]+".dec",texto_claro)
+                print("hash .dec= "+ hashlib.md5(texto_claro.encode('utf-8')).hexdigest())
 
         ###aqui va el cenigma
         elif sys.argv[3] == "-e":
@@ -359,6 +366,7 @@ def menu():
             if sys.argv[2] == "-c":
                 print("cifrando ...")
                 texto=leer_archivo(sys.argv[1])
+                textop=texto;
                 if sys.argv[1]=="MobyDick.txt":
                     # REEMPLAZAR MOBY
                     texto=texto.replace("\n",'Z')
@@ -371,6 +379,7 @@ def menu():
                     fin=time.clock()-inicio
                     print("Proceso terminado en",fin,"segundos")
                     escribe_archivo(sys.argv[4]+".cif",cif)
+                    print("hash "+sys.argv[1]+"="+ hashlib.md5(textop.encode('utf-8')).hexdigest())
                 else:
 
                     texto=texto.replace("Ü","A")
@@ -386,32 +395,27 @@ def menu():
                     fin=time.clock()-inicio
                     print("Proceso terminado en",fin,"segundos")
                     escribe_archivo(sys.argv[4]+".cif",cif)
+                    #print("hash "+sys.argv[1]+"="+ hashlib.md5(cif.encode('utf-8')).hexdigest())
 
             elif sys.argv[2] =="-d":
                 print("Descifrando...")
                 textocif = leer_archivo(sys.argv[1])
                 if sys.argv[1]=="MobyDick.cif":
-                    inicio = time.clock() 
-                    td = enigma(textocif,[2,3,1],[5,4,17],[11,1,2,20,4,5,6,7,8,9,10,0,12,13,14,15,16,17,18,19,3,21,22,23,24,25])
-                    t = list(td)
-                    #RESTAURAR MOBY
-                    t[114392] ='_'
-                    t[114396] ='_'
-                    t[125136] ='_'
-                    t[125140] ='_'
-                    t[290954] ='['
-                    t[290987] =']'
-                    t[845510] ='['
-                    t[845656] =']'
-                    t[958507] ='%'
-                    t[966800] ='\n'
-                    fin=time.clock()-inicio
-                    print("Proceso terminado en",fin,"segundos")
-                    tf=''.join(t) 
-                    escribe_archivo(sys.argv[4]+".dec",tf)
+                	cambios=listaCambiosQ("MobyDick.txt")
+                	inicio = time.clock() 
+                	td = enigma(textocif,[2,3,1],[5,4,17],[11,1,2,20,4,5,6,7,8,9,10,0,12,13,14,15,16,17,18,19,3,21,22,23,24,25])
+                	t = list(td)
+                	for i in cambios:
+                		car = i[0]
+                		t[i[1]]=car
+                	fin=time.clock()-inicio
+                	print("Proceso terminado en",fin,"segundos")
+                	tf=''.join(t) 
+                	escribe_archivo(sys.argv[4]+".dec",tf)
+                	print("hash "+sys.argv[4]+".dec="+ hashlib.md5(tf.encode('utf-8')).hexdigest())
                 else:
 
-                    cambios  =listaCambiosQ()
+                    cambios  =listaCambiosQ(sys.argv[1])
                     inicio = time.clock() 
                     td = enigma(textocif,[2,3,1],[5,4,17],[11,1,2,20,4,5,6,7,8,9,10,0,12,13,14,15,16,17,18,19,3,21,22,23,24,25])
                     t = list(td)
@@ -425,6 +429,7 @@ def menu():
                     tf=''.join(t) 
                     
                     escribe_archivo(sys.argv[4]+".dec",tf)
+                    print("hash "+sys.argv[4]+".dec="+ hashlib.md5(tf.encode('utf-8')).hexdigest())
 
 
 letra_clave = ['A', 'D', 'F', 'G', 'V', 'X']
@@ -555,11 +560,11 @@ def key_generator(tamano,chars='ABCDEFGHIJKLMNÑOPQRSTUVWXYZ'):
     size =tamano 
     return ''.join(random.choice(chars) for _ in range(size))
 #funcion para obtener el binario apartir de texto
-def text_to_bits(text, encoding='utf-8', errors='surrogatepass'):
+def text_to_bits(text, encoding='iso-8859-1', errors='surrogatepass'):
     bits = bin(int.from_bytes(text.encode(encoding, errors), 'big'))[2:]
     return bits.zfill(8 * ((len(bits) + 7) // 8))
 #funcion para obtener el  texto apartir de binario
-def text_from_bits(bits, encoding='utf-8', errors='surrogatepass'):
+def text_from_bits(bits, encoding='iso-8859-1', errors='surrogatepass'):
     n = int(bits, 2)
     return n.to_bytes((n.bit_length() + 7) // 8, 'big').decode(encoding, errors) or '\0'
 
@@ -807,7 +812,7 @@ def rotor(letra, numero, inverso=False): # Introducimos la "letra" que queremos 
     #V=[21, 25, 1, 17, 6, 8, 19, 24, 20, 15, 18, 3, 13, 7, 11, 23, 0, 22, 12, 9, 16, 14, 5, 4, 2, 10]
     # Siempre es más fácil trabajar con listas (había escrito 'vectores' pero he decidido cambiar el término):
     
-    tipo=[I,II,III,] # Como véis, el rotor I es el 0, el rotor II es el 1 y el III es el 2. ¿Cuándo nos pondremos de acuerdo en cuál es el primer número natural? (Yo voto 0)
+    tipo=[I,II,III] # Como véis, el rotor I es el 0, el rotor II es el 1 y el III es el 2. ¿Cuándo nos pondremos de acuerdo en cuál es el primer número natural? (Yo voto 0)
 
     if inverso==False:
         return tipo[numero-1][(letra)%26] # Devolvemos la letra cifrada con el rotor escogido. 
@@ -894,8 +899,8 @@ def escribe_archivo(nombre,contenido):
     f.close()
     
 
-def listaCambiosQ():
-    texto = leer_archivo("quijote.txt")
+def listaCambiosQ(archivo):
+    texto = leer_archivo(archivo)
     listatext= list(texto)
     pos=0
 
